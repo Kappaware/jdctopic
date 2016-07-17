@@ -17,7 +17,7 @@ This make jdctopic a fully idempotent tool, as all modern DevOps tools should be
 ***
 ## Usage
 
-jdctopic is provided as rpm packages (Sorry, only this packaging is currently provided. Contribution welcome), on the [release pages](https://github.com/BROADSoftware/jdctopic/releases).
+jdctopic is provided as rpm packages (Sorry, only this packaging is currently provided. Contribution welcome), on the [release pages](https://github.com/Kappaware/jdctopic/releases).
 
 Once installed, usage is the following:
 
