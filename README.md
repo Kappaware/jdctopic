@@ -107,7 +107,7 @@ This role can be used as following;
 	
 	- hosts: cmd_node
 	  vars:
-        jdctopic_rpm_url: https://github.com/BROADSoftware/jdctopic/releases/download/v0.1.0/jdctopic-0.1.0-1.noarch.rpm
+        jdctopic_rpm_url: https://github.com/Kappaware/jdctopic/releases/download/v0.1.0/jdctopic-0.1.0-1.noarch.rpm
 	    topic_list1:
 	      topics:
 	      - name: test1a
