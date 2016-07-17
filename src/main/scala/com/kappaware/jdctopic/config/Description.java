@@ -59,11 +59,11 @@ public class Description {
 		public Properties properties;
 		
 		void polish(State defaultState) throws ConfigurationException {
-			if(name == null || this.replicationFactor == null | this.partitionFactor == null) {
-				throw new ConfigurationException("name, replicationFactor and partitionFactor must be defined");
-			}
 			if(state == null) {
 				state = defaultState;
+			}
+			if(state == State.present && (name == null || this.replicationFactor == null || this.partitionFactor == null)) {
+				throw new ConfigurationException("name, replicationFactor and partitionFactor must be defined");
 			}
 			if(this.properties == null) {
 				this.properties = new Properties();
