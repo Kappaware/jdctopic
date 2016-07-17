@@ -15,8 +15,26 @@
  */
 package com.kappaware.jdctopic;
 
+import java.io.StringWriter;
+
+import com.esotericsoftware.yamlbeans.YamlConfig;
+import com.esotericsoftware.yamlbeans.YamlWriter;
 
 public class Misc {
+
+	public static String toYamlString(Object o, YamlConfig yamlConfig) {
+		StringWriter sw = new StringWriter();
+		YamlWriter yamlWriter = new YamlWriter(sw, yamlConfig);
+		try {
+			yamlWriter.write(o);
+			yamlWriter.close();
+			sw.close();
+		} catch (Exception e) {
+			throw new RuntimeException("Exception in YAML generation", e);
+		}
+		return sw.toString();
+	}
+	
 	
 	public static String indent(String prefix, String value) {
 		StringBuffer sb = new StringBuffer();

@@ -32,7 +32,7 @@ object MutationBuilder {
     // Compute the new topic to be created
     result ++= targetState.topicByName.filter( (t) => t._2.state == Description.State.present).keys.toSet.diff(initialState.topicByName.keys.toSet).map(topic => new CreateTopic(targetState.topicByName(topic)))
     // Compute the topic to be deleted
-    result ++= initialState.topicByName.filter( (t) => t._2.state == Description.State.absent).keys.toSet.intersect(targetState.topicByName.keys.toSet).map(topic => new DeleteTopic(topic))
+    result ++= targetState.topicByName.filter( (t) => t._2.state == Description.State.absent).keys.toSet.intersect(initialState.topicByName.keys.toSet).map(topic => new DeleteTopic(topic))
 
     initialState.topicByName.keys.toSet.intersect(targetState.topicByName.keys.toSet).foreach { topic =>
       val initialTopic = initialState.topicByName(topic)

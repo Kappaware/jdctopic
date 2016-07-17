@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.Properties;
 
 import com.esotericsoftware.yamlbeans.YamlConfig;
+import com.kappaware.jdctopic.Misc;
 
 public class Description {
 	public enum State {
@@ -31,7 +32,7 @@ public class Description {
 
 	static YamlConfig yamlConfig = new YamlConfig();
 	static {
-		yamlConfig.setPropertyElementType(Description.class, "topis", Topic.class);
+		yamlConfig.setPropertyElementType(Description.class, "topics", Topic.class);
 		yamlConfig.writeConfig.setWriteRootTags(false);
 		yamlConfig.writeConfig.setWriteRootElementTags(false);
 	}
@@ -67,6 +68,10 @@ public class Description {
 			if(this.properties == null) {
 				this.properties = new Properties();
 			}
+		}
+		
+		public String toString() {
+			return Misc.toYamlString(this, Description.yamlConfig);
 		}
 	}
 
