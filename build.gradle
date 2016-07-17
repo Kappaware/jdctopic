@@ -13,10 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- 
-defaultTasks 'fatJar'
- 
 
+
+plugins {
+  id 'nebula.ospackage' version '3.4.0'
+}
+
+defaultTasks 'rpm'
+ 
 group = 'com.kappaware.jdctopic'
 
 apply plugin: 'scala'
@@ -78,4 +82,29 @@ task run_main(type: JavaExec) {
 	}
 }
 
+
+task rpm(type: Rpm) {
+	summary 'Kafka topic creation tool'
+	packageName 'jdctopic'
+	version versionForRpm
+	arch NOARCH
+	vendor 'BROADSoftware'
+	license 'Apache 2.0'
+	os LINUX
+	release '1'
+	packageDescription 'jdctopic is an Kafka admin tool allowing idempotency on topics definition.'
+    
+   	from(fatJar.outputs.files) {
+	    into '/opt/jdctopic'
+	    user 'root'
+		group 'root'
+		//rename "${fatJarBaseName}(.+).jar", "${fatJarBaseName}.jar"
+	    fileMode 0644
+    }
+    
+   	from('scripts/packages/jdctopic') { into '/usr/bin'; user 'root'; group 'root'; fileMode 0755  }
+   	from('scripts/packages/log4j.xml') { into '/etc/jdctopic'; user 'root'; group 'root'; fileMode 0644  }
+   	from('scripts/packages/setenv.sh') { into '/etc/jdctopic'; user 'root'; group 'root'; fileMode 0644    }
+    
+}
 

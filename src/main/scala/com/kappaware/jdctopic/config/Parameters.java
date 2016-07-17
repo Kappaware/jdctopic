@@ -45,7 +45,7 @@ public class Parameters {
 		parser.formatHelpWith(new BuiltinHelpFormatter(120,2));
 	}
 
-	static OptionSpec<String> INPUT_FILE_OPT = parser.accepts("inputFile", "Hbase table layout description").withRequiredArg().describedAs("input file").ofType(String.class).required();
+	static OptionSpec<String> INPUT_FILE_OPT = parser.accepts("inputFile", "Kafka topics description").withRequiredArg().describedAs("input file").ofType(String.class).required();
 	static OptionSpec<String> ZOOKEEPER_OPT = parser.accepts("zookeeper", "Comma separated values of Zookeeper nodes").withRequiredArg().describedAs("zk1:2181,ek2:2181").ofType(String.class);
 	static OptionSpec<State> DEFAULT_STATE = parser.accepts("defaultState", "Default entity state").withRequiredArg().describedAs("present|absent").ofType(State.class).defaultsTo(State.present);
 	static OptionSpec<Void> DRY_RUN_OPT = parser.accepts("dryRun", "Test mode No operation will ne performed.");

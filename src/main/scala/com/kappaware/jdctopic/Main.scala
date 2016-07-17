@@ -32,8 +32,10 @@ object Main {
     } catch {
       case ce: ConfigurationException =>
         logger.error(ce.getMessage)
+        System.err.println(ce.getMessage)
         System.exit(1)
       case e: Exception =>
+        System.err.println(e.getMessage)
         logger.error(e)("ERROR")
         System.exit(3)
     }
