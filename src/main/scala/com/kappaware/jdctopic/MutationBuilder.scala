@@ -37,10 +37,10 @@ object MutationBuilder {
     initialState.topicByName.keys.toSet.intersect(targetState.topicByName.keys.toSet).foreach { topic =>
       val initialTopic = initialState.topicByName(topic)
       val targetTopic = targetState.topicByName(topic)
-      if (initialTopic.partitionFactor != targetTopic.partitionFactor) {
+      if (targetTopic.partitionFactor != null && initialTopic.partitionFactor != targetTopic.partitionFactor) {
         result += new ChangePartitionFactor(topic, initialTopic.partitionFactor, targetTopic.partitionFactor)
       }
-      if (initialTopic.replicationFactor != targetTopic.replicationFactor) {
+      if (targetTopic.replicationFactor != null && initialTopic.replicationFactor != targetTopic.replicationFactor) {
         result += new ChangeReplicationFactor(topic, initialTopic.replicationFactor, targetTopic.replicationFactor)
       }
       val propertiesToRemove = initialTopic.properties.keys.toSeq.diff(targetTopic.properties.keys.toSeq)
