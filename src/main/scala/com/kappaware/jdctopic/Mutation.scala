@@ -42,7 +42,7 @@ object Mutation {
   case class CreateTopic(topicConfig: Description.Topic) extends Mutation(topicConfig.name) {
     def execute(kafkaAdmin: KafkaAdmin, onlyCheck: Boolean): Unit = {
       if (!onlyCheck) {
-        kafkaAdmin.createTopic(topicConfig.name, topicConfig.partitionFactor, topicConfig.replicationFactor, topicConfig.properties)
+        kafkaAdmin.createTopic(topicConfig.name, topicConfig.partitionFactor, topicConfig.replicationFactor, topicConfig.assignments, topicConfig.properties)
       }
     }
     override def display(): String = {
@@ -114,6 +114,16 @@ object Mutation {
       }
       str
     }
+  }
+  
+  case class ChangeAssignment(topic : String, oldValue: java.util.Map[Integer, java.util.List[Integer]], newValue: java.util.Map[Integer, java.util.List[Integer]]) extends Mutation(topic)  {
+    def execute(kafkaAdmin: KafkaAdmin, onlyCheck: Boolean) = {
+      throw new ConfigurationException(s"Unable to change assignment on topic '${topic}': NOT IMPLEMENTED")
+    }
+    override def display(): String = {
+      s"==> Unable to change assignment on topic '${topic}': NOT IMPLEMENTED"
+    }
+    
   }
 
 }

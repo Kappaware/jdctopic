@@ -94,6 +94,29 @@ For example:
 
 Will delete columnFamily `topic1` and `topic2` (if existing) from previous configuration. 
 
+### Replica assignments (From 0.1.2 version)
+
+For new topic creation, Kafka will automatically assign partition replica on available brokers. 
+
+In certain circumstance, one may need to manually define the distribution of such replica, with strict location rules.
+
+This can be achieved with the following syntax 
+
+	- name: topic1
+      properties:
+	    delete.retention.ms: 315360000000
+      assignments:
+      0 : [ 1, 2, 3 ]
+      1 : [ 3, 2, 1 ]
+
+Where replication and partition factor are replaced with an 'assignment' descriptor. Such descriptor is a Map where the key is the partition# and the value a list of brokerIds
+
+The partition# must be numbered from 0 up to wanted value. And all partitions must include the same number of replica.
+
+To find the brokerIds value, one may use the kdescribe tool.
+
+Note partition re-assignment on topic modification is not supported. One may use the kafka provided partition reassignment tool (kafka-reassign-partitions.sh) for this.
+  
 ***
 ## Ansible integration
 

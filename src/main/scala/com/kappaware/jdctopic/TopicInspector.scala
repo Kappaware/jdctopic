@@ -21,6 +21,10 @@ import com.kappaware.jdctopic.config.Description
 import java.util.ArrayList
 import kafka.admin.AdminUtils
 import kafka.server.ConfigType
+//import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
+import java.util.HashMap
+
 
 object TopicInspector {
   private val logger = getLogger
@@ -35,12 +39,19 @@ object TopicInspector {
           val dTopic = new Description.Topic()
           dTopic.name = topic
           if (zkUtils.pathExists(ZkUtils.getDeleteTopicPath(topic))) {
-            ???
+            logger.warn(s"Topic ${topic} flagged as deleted!")
           }
           dTopic.properties = AdminUtils.fetchEntityConfig(zkUtils, ConfigType.Topic, topic)
-          val sortedPartitions = topicPartitionAssignment.toList.sortWith((m1, m2) => m1._1 < m2._1)
           dTopic.partitionFactor = topicPartitionAssignment.size
           dTopic.replicationFactor = topicPartitionAssignment.head._2.size
+
+          dTopic.assignments = new HashMap[Integer, java.util.List[Integer]]
+          for(p: Int <- topicPartitionAssignment.keys) {
+            //var x = topicPartitionAssignment(p).map( i => i:java.lang.Integer).asJava
+            //var y = topicPartitionAssignment(p).asInstanceOf[java.util.List[java.lang.Integer]] DOes not works
+            dTopic.assignments.put(p.asInstanceOf[java.lang.Integer], topicPartitionAssignment(p).map( i => i:java.lang.Integer).asJava)
+          }
+          
           description.topics.add(dTopic)
         case None =>
           logger.error("Topic " + topic + " doesn't exist!")

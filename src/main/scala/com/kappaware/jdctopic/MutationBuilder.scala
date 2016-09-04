@@ -15,7 +15,6 @@
  */
 package com.kappaware.jdctopic
 
-
 import scala.collection.JavaConversions._
 import java.util.Properties
 import com.kappaware.jdctopic.config.Description
@@ -30,29 +29,36 @@ object MutationBuilder {
 
     var result = collection.mutable.Buffer[Mutation]()
     // Compute the new topic to be created
-    result ++= targetState.topicByName.filter( (t) => t._2.state == Description.State.present).keys.toSet.diff(initialState.topicByName.keys.toSet).map(topic => new CreateTopic(targetState.topicByName(topic)))
+    result ++= targetState.topicByName.filter((t) => t._2.state == Description.State.present).keys.toSet.diff(initialState.topicByName.keys.toSet).map(topic => new CreateTopic(targetState.topicByName(topic)))
     // Compute the topic to be deleted
-    result ++= targetState.topicByName.filter( (t) => t._2.state == Description.State.absent).keys.toSet.intersect(initialState.topicByName.keys.toSet).map(topic => new DeleteTopic(topic))
+    result ++= targetState.topicByName.filter((t) => t._2.state == Description.State.absent).keys.toSet.intersect(initialState.topicByName.keys.toSet).map(topic => new DeleteTopic(topic))
 
     initialState.topicByName.keys.toSet.intersect(targetState.topicByName.keys.toSet).foreach { topic =>
       val initialTopic = initialState.topicByName(topic)
       val targetTopic = targetState.topicByName(topic)
-      if (targetTopic.partitionFactor != null && initialTopic.partitionFactor != targetTopic.partitionFactor) {
-        result += new ChangePartitionFactor(topic, initialTopic.partitionFactor, targetTopic.partitionFactor)
-      }
-      if (targetTopic.replicationFactor != null && initialTopic.replicationFactor != targetTopic.replicationFactor) {
-        result += new ChangeReplicationFactor(topic, initialTopic.replicationFactor, targetTopic.replicationFactor)
-      }
-      val propertiesToRemove = initialTopic.properties.keys.toSeq.diff(targetTopic.properties.keys.toSeq)
-      val propertiesToAdd = new Properties()
-      targetTopic.properties.foreach { prop => 
-        val v = initialTopic.properties.get(prop._1)
-        if(v == null || !v.equals(targetTopic.properties.get(prop._1))) {
-          propertiesToAdd += prop
+      if (targetTopic.state == Description.State.present) {
+        if (targetTopic.assignments != null) {
+          if (!targetTopic.assignments.equals(initialTopic.assignments)) {
+            result += new ChangeAssignment(topic, initialTopic.assignments, targetTopic.assignments)
+          }
         }
-      }
-      if (propertiesToRemove.size > 0 || propertiesToAdd.size > 0) {
-        result += new ChangeProperties(topic, propertiesToAdd, propertiesToRemove.asInstanceOf[Seq[String]])
+        if (targetTopic.partitionFactor != null && initialTopic.partitionFactor != targetTopic.partitionFactor) {
+          result += new ChangePartitionFactor(topic, initialTopic.partitionFactor, targetTopic.partitionFactor)
+        }
+        if (targetTopic.replicationFactor != null && initialTopic.replicationFactor != targetTopic.replicationFactor) {
+          result += new ChangeReplicationFactor(topic, initialTopic.replicationFactor, targetTopic.replicationFactor)
+        }
+        val propertiesToRemove = initialTopic.properties.keys.toSeq.diff(targetTopic.properties.keys.toSeq)
+        val propertiesToAdd = new Properties()
+        targetTopic.properties.foreach { prop =>
+          val v = initialTopic.properties.get(prop._1)
+          if (v == null || !v.equals(targetTopic.properties.get(prop._1))) {
+            propertiesToAdd += prop
+          }
+        }
+        if (propertiesToRemove.size > 0 || propertiesToAdd.size > 0) {
+          result += new ChangeProperties(topic, propertiesToAdd, propertiesToRemove.asInstanceOf[Seq[String]])
+        }
       }
     }
     result.sortWith(_.sortKey < _.sortKey)

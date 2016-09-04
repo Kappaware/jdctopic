@@ -23,18 +23,35 @@ import kafka.utils.ZkUtils
 import org.I0Itec.zkclient.exception.ZkNodeExistsException
 import kafka.admin.AdminOperationException
 import kafka.utils.Logging
+import scala.collection.JavaConverters._
+import com.kappaware.jdctopic.config.ConfigurationException
 
 /**
  * @author Serge ALEXANDRE
  */
 case class KafkaAdmin(zkUtils: ZkUtils, destructive: Boolean) extends Logging {
 
-  def createTopic(name: String, partitionFactor: Int, replicationFactor: Int, properties: Properties = new Properties()) = {
-    AdminUtils.createTopic(zkUtils, name, partitionFactor, replicationFactor, properties)
+  def createTopic(name: String, partitionFactor: Int, replicationFactor: Int, jassignment: java.util.Map[Integer, java.util.List[Integer]], properties: Properties = new Properties()) = {
+    if (jassignment == null) {
+      AdminUtils.createTopic(zkUtils, name, partitionFactor, replicationFactor, properties)
+    } else {
+      val partitionReplicaAssignment = jassignment.asScala.map(x => (x._1.toInt, x._2.asScala.toSeq.map(_.toInt)))
+
+      val brokerIds = zkUtils.getChildrenParentMayNotExist(ZkUtils.BrokerIdsPath).map(_.toInt).toSet
+      partitionReplicaAssignment.values.foreach { brokerList =>
+        brokerList.foreach { x =>
+          if(!brokerIds.contains(x)) {
+              throw new ConfigurationException(s"Topic '${name}': '${x}' is not a valid broker ID")
+          }
+        }
+      }
+
+      AdminUtils.createOrUpdateTopicPartitionAssignmentPathInZK(zkUtils, name, partitionReplicaAssignment, properties)
+    }
   }
 
   def fetchTopiConfig(topic: String): Properties = {
-    AdminUtils.fetchEntityConfig(zkUtils, "topics",  topic)
+    AdminUtils.fetchEntityConfig(zkUtils, "topics", topic)
   }
 
   def changeTopiConfig(topic: String, config: Properties): Unit = {
