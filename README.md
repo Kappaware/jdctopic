@@ -92,7 +92,7 @@ For example:
 	    retention.ms: 215360000000
 	    cleanup.policy: delete
 
-Will delete columnFamily `topic1` and `topic2` (if existing) from previous configuration. 
+Will delete topics `topic1` and `topic2` (if existing) from previous configuration. 
 
 ### Replica assignments (From 0.1.2 version)
 
@@ -106,8 +106,8 @@ This can be achieved with the following syntax
       properties:
 	    delete.retention.ms: 315360000000
       assignments:
-      0 : [ 1, 2, 3 ]
-      1 : [ 3, 2, 1 ]
+        0 : [ 1, 2, 3 ]
+        1 : [ 3, 2, 1 ]
 
 Where replication and partition factor are replaced with an 'assignment' descriptor. Such descriptor is a Map where the key is the partition# and the value a list of brokerIds
 
