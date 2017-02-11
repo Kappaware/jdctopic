@@ -31,16 +31,22 @@ repositories {
     jcenter()
 }
 
+
+configurations {
+	compileAndJar
+	compile.extendsFrom(compileAndJar)
+}
+
 dependencies {
 	compile "org.log4s:log4s_${scalaVersion.substring(0,4)}:$log4sVersion"
  	compile "org.slf4j:slf4j-log4j12:$sl4jLog4jVersion"
     compile "org.slf4j:slf4j-api:$sl4jApiVersion"
     compile "log4j:log4j:$log4jVersion"
-    compile "net.sf.jopt-simple:jopt-simple:$joptVersion"
+    compileAndJar "net.sf.jopt-simple:jopt-simple:$joptVersion"
     //compile "com.fasterxml.jackson.jr:jackson-jr-objects:$jacksonJrVersion"
  	compile "org.scala-lang:scala-library:$scalaVersion" // To force $scalaVersion, otherwise, an oldest one will be pulled by kafka or other lib 
  	compile "org.apache.kafka:kafka_${scalaVersion.substring(0,4)}:$kafkaVersion"
- 	compile "com.esotericsoftware.yamlbeans:yamlbeans:$yamlbeansVersion"
+ 	compileAndJar "com.esotericsoftware.yamlbeans:yamlbeans:$yamlbeansVersion"
     testCompile "junit:junit:$junitVersion"
 }
 
@@ -64,10 +70,24 @@ task fatJar(type: Jar) {
         	'Implementation-Version': version,
         	'Main-Class': 'com.kappaware.jdctopic.Main'
     }
-    baseName = project.name
+    baseName = project.name + "_fat"
     from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
     with jar
 }
+
+
+//create a single Jar with non system dependencies
+task uberJar(type: Jar) {
+	manifest {
+        attributes 'Implementation-Title': 'kdescribe', 
+        	'Implementation-Version': version,
+        	'Main-Class': 'com.kappaware.kdescribe.Main'
+    }
+    baseName = project.name + "_uber"
+    from { configurations.compileAndJar.collect { it.isDirectory() ? it : zipTree(it) } }
+    with jar
+}
+
 
 
 // To launch as: ./run.sh main arg1 arg2 ..
@@ -94,7 +114,7 @@ task rpm(type: Rpm) {
 	release '1'
 	packageDescription 'jdctopic is an Kafka admin tool allowing idempotency on topics definition.'
     
-   	from(fatJar.outputs.files) {
+   	from(uberJar.outputs.files) {
 	    into '/opt/jdctopic'
 	    user 'root'
 		group 'root'

@@ -1,4 +1,8 @@
-#!/bin/sh
+#!/bin/bash
+
+# You may have to edit this line to adjust to your environement
+# This script will try to use one of these folder to find the Kafka jars.
+CANDIDATE_KLIBS="/usr/share/java/kafka /usr/hdp/current/kafka-broker/libs"
 
 
 prog=jdctopic
@@ -81,6 +85,35 @@ checkJar() {
 
 checkJava
 checkJar
-$java -jar $JOPTS $jar $OPTS $*
+
+
+set +x
+
+
+if [[ -z "$KAFKA_LIBS" ]]; then
+	for KL in ${CANDIDATE_KLIBS}
+	do
+		if [ "$(echo ${KL}/kafka*.jar)" != "${KL}/kafka*.jar" ]; then
+			KAFKA_LIBS=${KL}
+			break
+		fi
+	done
+fi
+
+if [[ -z "$KAFKA_LIBS" ]]; then
+	echo "Unable to locate a KAFKA_LIBS folder in '${CANDIDATE_KLIBS}'."
+	echo "Are you sure kafka broker's libs are installed ?"
+	echo "You may need to adjust this script. See comment on top"
+	exit 1
+fi	
+
+
+CLASSPATH="$jar"
+for i in ${KAFKA_LIBS}/*.jar; do
+    CLASSPATH=$CLASSPATH:$i
+done
+
+
+$java -classpath $CLASSPATH $JOPTS com.kappaware.jdctopic.Main $OPTS "$@"
 
 
