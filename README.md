@@ -15,9 +15,17 @@ jdctopic is a convergence tool. Its aim is to align the real configuration to wh
 This make jdctopic a fully idempotent tool, as all modern DevOps tools should be.
 
 ***
-## Usage
+## Installation
 
 jdctopic is provided as rpm packages (Sorry, only this packaging is currently provided. Contribution welcome), on the [release pages](https://github.com/Kappaware/jdctopic/releases).
+
+jdctopic will need to access the Kafka installation jars files. A broker node will typically provide them. Another solution would be to install Kafka package on the node you want to run jdctopic.
+
+The launching script of jdctopic will try to lookup such jars file in some well known locations. If this is unsuccessful, you can easily add more path by modifying the `CANDIDATE_KLIBS` variable into the `/etc/jdctopic/setenv.sh` file.
+
+***
+## Usage
+
 
 Once installed, usage is the following:
 
@@ -130,7 +138,7 @@ This role can be used as following;
 	
 	- hosts: cmd_node
 	  vars:
-        jdctopic_rpm_url: https://github.com/Kappaware/jdctopic/releases/download/v0.1.0/jdctopic-0.1.0-1.noarch.rpm
+        jdctopic_rpm_url: https://github.com/Kappaware/jdctopic/releases/download/v0.2.0/jdctopic-0.2.0-1.noarch.rpm
 	    topic_list1:
 	      topics:
 	      - name: test1a
@@ -143,6 +151,15 @@ This role can be used as following;
 	  - { role: kappatools/jdctopic, jdctopic_description: "{{topic_list1}}" }
 	  
 > Note `- hosts: zookeepers` at the beginning, which force ansible to grab info about the hosts in the [zookeepers] group, to be able to fulfill this info into jdctopic configuration. Of course, such a group must be defined in the inventory. 
+
+
+***
+## Kerberos support
+
+If kerberos is activated, prior to using jdctopcic, you must perform a `kinit` command, with a principal granting access to all the topics before issuing kdescribe command. For example:
+
+    # kinit -kt /etc/security/keytabs/kafka.service.keytab kafka/my.broker.host@MY.REALM.COM
+
 
 ***
 ## Build

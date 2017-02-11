@@ -1,10 +1,5 @@
 #!/bin/bash
 
-# You may have to edit this line to adjust to your environement
-# This script will try to use one of these folder to find the Kafka jars.
-CANDIDATE_KLIBS="/usr/share/java/kafka /usr/hdp/current/kafka-broker/libs"
-
-
 prog=jdctopic
 jar=$(echo /opt/jdctopic/jdctopic*.jar)
 
