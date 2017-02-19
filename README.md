@@ -156,7 +156,7 @@ This role can be used as following;
 ***
 ## Kerberos support
 
-If kerberos is activated, prior to using jdctopcic, you must perform a `kinit` command, with a principal granting access to all the topics before issuing kdescribe command. For example:
+If kerberos is activated, prior to using jdctopcic, you must perform a `kinit` command, with a principal granting access to all the topics before issuing jdctopic command. For example:
 
     # kinit -kt /etc/security/keytabs/kafka.service.keytab kafka/my.broker.host@MY.REALM.COM
 
