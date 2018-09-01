@@ -78,12 +78,13 @@ task fatJar(type: Jar) {
 
 //create a single Jar with non system dependencies
 task uberJar(type: Jar) {
+   classifier 'uber'
 	manifest {
-        attributes 'Implementation-Title': 'kdescribe', 
+        attributes 'Implementation-Title': 'jdctopic', 
         	'Implementation-Version': version,
-        	'Main-Class': 'com.kappaware.kdescribe.Main'
+        	'Main-Class': 'com.kappaware.jdctopic.Main'
     }
-    baseName = project.name + "_uber"
+    baseName = project.name
     from { configurations.compileAndJar.collect { it.isDirectory() ? it : zipTree(it) } }
     with jar
 }
