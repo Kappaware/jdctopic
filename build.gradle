@@ -65,15 +65,17 @@ eclipseJdt.doLast( {
 
 //create a single Jar with all dependencies
 task fatJar(type: Jar) {
+   classifier 'far'
 	manifest {
-        attributes 'Implementation-Title': 'kdescribe', 
+        attributes 'Implementation-Title': 'jdctopic', 
         	'Implementation-Version': version,
         	'Main-Class': 'com.kappaware.jdctopic.Main'
     }
-    baseName = project.name + "_fat"
+    baseName = project.name
     from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
     with jar
 }
+
 
 
 //create a single Jar with non system dependencies
