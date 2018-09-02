@@ -107,7 +107,7 @@ task run_main(type: JavaExec) {
 
 task rpm(type: Rpm) {
 	summary 'Kafka topic creation tool'
-	packageName 'jdctopic'
+	packageName project.name
 	version versionForRpm
 	arch NOARCH
 	vendor 'BROADSoftware'
