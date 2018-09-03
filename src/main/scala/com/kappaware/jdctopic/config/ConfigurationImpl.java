@@ -36,6 +36,9 @@ public class ConfigurationImpl implements Configuration {
 		}
 		YamlReader yamlReader = new YamlReader(new FileReader(file), Description.yamlConfig);
 		description = yamlReader.read(Description.class);
+		if(description == null) {
+			throw new ConfigurationException(String.format("Missing or invalide content in '%s'", file.getAbsolutePath()));
+		}
 		if (parameters.getZookeeper() != null) {
 			description.zookeeper = parameters.getZookeeper(); // Override the value in file
 		}

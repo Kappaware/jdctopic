@@ -18,12 +18,15 @@ package com.kappaware.jdctopic
 import com.kappaware.jdctopic.config.Configuration
 import kafka.utils.ZkUtils
 import org.log4s._
+import org.apache.kafka.common.security.JaasUtils
 
 object Engine {
   private val logger = getLogger
 
   def run(config: Configuration): Unit = {
-    val zkUtils = ZkUtils.apply(config.getDescription.zookeeper, 30000, 30000, false)
+    val zkSecurityEnabled = JaasUtils.isZkSecurityEnabled()
+    logger.info(if (zkSecurityEnabled) "zookeeper security ENABLED" else "zookeeper security NOT enabled")
+    val zkUtils = ZkUtils(config.getDescription.zookeeper, 30000, 30000, zkSecurityEnabled)
     val target = new DescriptionWrapper(config.getDescription, config.isRelaxPropertyCheck())
     val current = new DescriptionWrapper(TopicInspector.inspect(zkUtils), true)
     val kafkaAdmin = new KafkaAdmin(zkUtils, true)
