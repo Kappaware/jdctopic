@@ -19,7 +19,7 @@ plugins {
   id 'nebula.ospackage' version '4.10.0'
 }
 
-defaultTasks 'rpm'
+defaultTasks 'uberJars'
  
 group = 'com.kappaware.jdctopic'
 
@@ -63,20 +63,6 @@ eclipseJdt.doLast( {
    	f.append('encoding/<project>=UTF-8')
 })
 
-//create a single Jar with all dependencies
-task fatJar(type: Jar) {
-   classifier 'far'
-	manifest {
-        attributes 'Implementation-Title': 'jdctopic', 
-        	'Implementation-Version': version,
-        	'Main-Class': 'com.kappaware.jdctopic.Main'
-    }
-    baseName = project.name
-    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
-    with jar
-}
-
-
 
 //create a single Jar with non system dependencies
 task uberJar(type: Jar) {
@@ -86,29 +72,14 @@ task uberJar(type: Jar) {
         	'Implementation-Version': version,
         	'Main-Class': 'com.kappaware.jdctopic.Main'
     }
-    baseName = project.name
+    baseName = uberJarBaseName
     from { configurations.compileAndJar.collect { it.isDirectory() ? it : zipTree(it) } }
     with jar
 }
 
-
-
-// To launch as: ./run.sh main arg1 arg2 ..
-task run_main(type: JavaExec) {
-	dependsOn classes
-	description = "Main Command launcher"
-	main = "com.kappaware.jdctopic.Main"
-	standardInput = System.in
-	classpath sourceSets.main.runtimeClasspath
-	if ( project.hasProperty("runArgs") ) {
-		args Eval.me(runArgs)	
-	}
-}
-
-
 task rpm(type: Rpm) {
 	summary 'Kafka topic creation tool'
-	packageName project.name
+	packageName rpmBaseName
 	version versionForRpm
 	arch NOARCH
 	vendor 'BROADSoftware'
@@ -128,6 +99,51 @@ task rpm(type: Rpm) {
    	from('scripts/packages/jdctopic') { into '/usr/bin'; user 'root'; group 'root'; fileMode 0755  }
    	from('scripts/packages/log4j.xml') { into '/etc/jdctopic'; user 'root'; group 'root'; fileMode 0644  }
    	from('scripts/packages/setenv.sh') { into '/etc/jdctopic'; user 'root'; group 'root'; fileMode 0644    }
-    
+}
+
+
+List variations = [ 
+   [ name: "1.0.0", kafkaVersion: "1.0.0", scalaVersion: "2.11.11"  ],    
+   [ name: "1.1.1", kafkaVersion: "1.1.1", scalaVersion: "2.11.11"  ],    
+   [ name: "2.0.0", kafkaVersion: "2.0.0", scalaVersion: "2.11.11"  ]    
+]
+   
+   
+
+for (cf in variations) {
+   tasks.create(name: "uberJar.${cf.name}", type: GradleBuild) {
+        startParameter = project.getGradle().getStartParameter().newInstance()
+        startParameter.projectProperties += [kafkaVersion: "${cf.kafkaVersion}"]
+        startParameter.projectProperties += [scalaVersion: "${cf.scalaVersion}"]
+        startParameter.projectProperties += [uberJarBaseName: "jdctopic.${cf.kafkaVersion}"]
+         //println startParameter.projectProperties
+       tasks = ['uberJar']
+   }
+ 
+   tasks.create(name: "rpm.${cf.name}", type: GradleBuild) {
+    startParameter = project.getGradle().getStartParameter().newInstance()
+        startParameter.projectProperties += [kafkaVersion: "${cf.kafkaVersion}"]
+        startParameter.projectProperties += [scalaVersion: "${cf.scalaVersion}"]
+        startParameter.projectProperties += [uberJarBaseName: "jdctopic.${cf.kafkaVersion}"]
+        startParameter.projectProperties += [rpmBaseName: "jdctopic.${cf.kafkaVersion}"]
+          //println startParameter.projectProperties
+        tasks = ['rpm']
+   }
+}
+
+task rpms(type: GradleBuild) {
+  tasks =  [
+      'rpm.1.0.0',
+      'rpm.1.1.1',
+      'rpm.2.0.0'
+  ]
+}
+
+task uberJars(type: GradleBuild) {
+  tasks =  [
+      'uberJar.1.0.0',
+      'uberJar.1.1.1',
+      'uberJar.2.0.0'
+  ]
 }
 
