@@ -40,8 +40,8 @@ case class KafkaAdmin(zkUtils: ZkUtils, destructive: Boolean) extends Logging {
       val brokerIds = zkUtils.getChildrenParentMayNotExist(ZkUtils.BrokerIdsPath).map(_.toInt).toSet
       partitionReplicaAssignment.values.foreach { brokerList =>
         brokerList.foreach { x =>
-          if(!brokerIds.contains(x)) {
-              throw new ConfigurationException(s"Topic '${name}': '${x}' is not a valid broker ID")
+          if (!brokerIds.contains(x)) {
+            throw new ConfigurationException(s"Topic '${name}': '${x}' is not a valid broker ID")
           }
         }
       }
@@ -60,7 +60,13 @@ case class KafkaAdmin(zkUtils: ZkUtils, destructive: Boolean) extends Logging {
 
   def increasePartition(topic: String, partitionFactor: Int): Unit = {
     val configs = AdminUtils.fetchEntityConfig(zkUtils, "topics", topic)
-    AdminUtils.addPartitions(zkUtils, topic, partitionFactor)
+    val existingAssignment = zkUtils.getReplicaAssignmentForTopics(List(topic)).map {
+      case (topicPartition, replicas) => topicPartition.partition -> replicas
+    }
+    if (existingAssignment.isEmpty)
+      throw new ConfigurationException(s"The topic $topic does not exist")
+    val allBrokers = AdminUtils.getBrokerMetadatas(zkUtils)
+    AdminUtils.addPartitions(zkUtils, topic,existingAssignment, allBrokers, partitionFactor)
   }
 
   def deleteTopic(topic: String): Unit = {
